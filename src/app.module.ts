@@ -5,9 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(),
+  imports: [ConfigModule.forRoot({
+    isGlobal: true
+  }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -19,7 +22,8 @@ import { UsersModule } from './users/users.module';
       }),
       inject: [ConfigService],
     }),
-    UsersModule,],
+    UsersModule,
+    AuthModule,],
   controllers: [AppController],
   providers: [AppService],
 })
