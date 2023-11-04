@@ -16,7 +16,7 @@ export class User {
   name: string;
 
   @Prop({default: "https://www.crescenttide.com/wp-content/uploads/2019/07/no-avatar-300x300.png"})
-  pic: string;
+  avatar: string;
 
   @Prop()
   role: string;

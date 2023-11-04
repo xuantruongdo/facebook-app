@@ -1,13 +1,7 @@
 import { Type } from 'class-transformer';
 import {
-  IsDefined,
   IsEmail,
-  IsMongoId,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  IsOptional,
-  ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
 

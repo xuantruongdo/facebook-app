@@ -40,14 +40,14 @@ export class AuthService {
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, pic, role } = user;
+    const { _id, name, email, avatar, role } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
       _id,
       name,
       email,
-      pic,
+      avatar,
       role,
     };
 
@@ -62,7 +62,7 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
-      user: { _id, name, email, pic, role },
+      user: { _id, name, email, avatar, role },
     };
   }
 
@@ -81,7 +81,7 @@ export class AuthService {
       let user = await this.usersService.findUserByToken(refresh_token);
 
       if (user) {
-        const { _id, name, email, pic, role } = user;
+        const { _id, name, email, avatar, role } = user;
 
         const payload = {
           sub: 'token login',
@@ -89,7 +89,7 @@ export class AuthService {
           _id,
           name,
           email,
-          pic,
+          avatar,
           role,
         };
 
@@ -105,7 +105,7 @@ export class AuthService {
         });
         return {
           access_token: this.jwtService.sign(payload),
-          user: { _id, name, email, pic, role },
+          user: { _id, name, email, avatar, role },
         };
       }
     } catch (err) {
