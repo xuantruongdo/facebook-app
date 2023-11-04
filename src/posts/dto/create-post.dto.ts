@@ -1,5 +1,4 @@
-import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
-import mongoose from 'mongoose';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreatePostDto {
 
