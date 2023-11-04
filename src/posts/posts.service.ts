@@ -32,6 +32,14 @@ export class PostsService {
     return await this.postModel.find({ author: user._id }).populate([
       { path: 'author', select: { _id: 1, name: 1, email: 1 } },
       { path: 'likes', select: { _id: 1, name: 1, email: 1 } },
+      {
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: { _id: 1, name: 1, email: 1, avatar: 1 },
+        },
+        select: { content: 1, user: 1 },
+      },
     ]);
   }
 
@@ -39,6 +47,14 @@ export class PostsService {
     return await this.postModel.findById(_id).populate([
       { path: 'author', select: { _id: 1, name: 1, email: 1 } },
       { path: 'likes', select: { _id: 1, name: 1, email: 1 } },
+      {
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: { _id: 1, name: 1, email: 1, avatar: 1 },
+        },
+        select: { content: 1, user: 1 },
+      },
     ]);
   }
 
@@ -91,6 +107,6 @@ export class PostsService {
     await post.save();
 
     // Trả về bài viết đã cập nhật
-    return "ok";
+    return 'ok';
   }
 }
