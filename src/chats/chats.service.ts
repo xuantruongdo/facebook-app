@@ -58,10 +58,17 @@ export class ChatsService {
 
       const newChat = await this.chatModel.create(chatData);
 
-      return {
-        _id: newChat?._id,
-        createdAt: newChat.createdAt,
-      };
+      return newChat.populate([
+        {
+          path: 'latestMessage',
+          populate: {
+            path: 'sender',
+            select: { _id: 1, name: 1, email: 1, avatar: 1 },
+          },
+          select: { content: 1, sender: 1 },
+        },
+        { path: 'users', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+      ]);;
     }
   }
 

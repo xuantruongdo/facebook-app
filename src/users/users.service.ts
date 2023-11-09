@@ -1,10 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  RegisterUserDto,
+  RegisterUserWithSocialDto,
+} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
+import { IUser } from 'src/type/users.interface';
+import aqp from 'api-query-params';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +39,8 @@ export class UsersService {
       name,
       email,
       password: hashPassword,
+      role: 'USER_NORMAL',
+      type: 'SYSTEM',
     });
 
     return newUser;
@@ -50,22 +58,72 @@ export class UsersService {
     return await this.userModel.updateOne({ _id }, { refreshToken });
   }
 
-  async findUserByToken (refreshToken: string) {
-    return await this.userModel.findOne(
-      {refreshToken}
-    )
+  async findUserByToken(refreshToken: string) {
+    return await this.userModel.findOne({ refreshToken });
   }
+
+  async findOne(id: string) {
+    return await this.userModel
+      .findById(id)
+      .select('-password -refreshToken')
+      .populate('followings', '_id name email avatar followers')
+      .populate('followers', '_id name email avatar followings');
+  }
+
+  async followUser(id: string, user: IUser) {
+    try {
+      const sentUser = await this.userModel.findById(user?._id);
+      const receivedUser = await this.userModel.findById(id);
+  
+           // Check if `sentUser` and `receivedUser` exist
+           if (!sentUser || !receivedUser) {
+            throw new BadRequestException('Không tồn tại user');
+          }
+    
+          // Check if `receivedUser._id` is already in the `sentUser.followings` array
+          const followingIndex = sentUser.followings.indexOf(receivedUser._id);
+    
+          // Check if `sentUser._id` is already in the `receivedUser.followers` array
+          const followerIndex = receivedUser.followers.indexOf(sentUser._id);
+    
+          // If `receivedUser._id` is already in `sentUser.followings`, remove it
+          if (followingIndex !== -1) {
+            sentUser.followings.splice(followingIndex, 1);
+          } else {
+            // If it's not present, add `receivedUser._id` to the `sentUser.followings`
+            sentUser.followings.push(receivedUser._id);
+          }
+    
+          // If `sentUser._id` is already in `receivedUser.followers`, remove it
+          if (followerIndex !== -1) {
+            receivedUser.followers.splice(followerIndex, 1);
+          } else {
+            // If it's not present, add `sentUser._id` to the `receivedUser.followers`
+            receivedUser.followers.push(sentUser._id);
+          }
+    
+          // Update `receivedUser` in the database
+          await this.userModel.findByIdAndUpdate(id, receivedUser);
+    
+          // Update `sentUser` in the database
+          await this.userModel.findByIdAndUpdate(sentUser._id, sentUser);
+    
+          return 'ok';
+        } catch (error) {
+          throw new Error('Lỗi khi lưu thông tin người dùng');
+        }
+  }
+    
+  
 
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findAll(qs: string) {
+    const { filter, sort, projection, population } = aqp(qs);
+    const users = await this.userModel.find(filter).select('-password -refreshToken')
+    return users
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

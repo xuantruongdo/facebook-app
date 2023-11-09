@@ -9,7 +9,7 @@ export class User {
   @Prop({ required: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
 
   @Prop({ required: true })
@@ -19,13 +19,37 @@ export class User {
   avatar: string;
 
   @Prop()
+  cover: string;
+
+  @Prop()
   role: string;
+
+  @Prop({default: false})
+  isActive: boolean;
+
+  @Prop()
+  type: string;
+
+  @Prop()
+  note: string;
+
+  @Prop()
+  work: string;
+
+  @Prop()
+  live: string;
+
+  @Prop()
+  from: string;
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
+  followers: mongoose.Types.ObjectId[];
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
+  followings: mongoose.Types.ObjectId[];
 
   @Prop()
   refreshToken: string;
-
-  //   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Role.name })
-  //   role: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: Object })
   createdBy: {

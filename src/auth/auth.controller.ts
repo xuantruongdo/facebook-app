@@ -9,7 +9,10 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import {
+  RegisterUserDto,
+  RegisterUserWithSocialDto,
+} from 'src/users/dto/create-user.dto';
 import { Public, ResponseMessage, UserReq } from 'src/decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request as RequestType, Response } from 'express';
@@ -40,13 +43,16 @@ export class AuthController {
     return { user };
   }
 
+  @Public()
   @ResponseMessage('Get user by refresh token')
   @Post('/refresh')
   handleRefreshToken(
     @Req() request: RequestType,
     @Res({ passthrough: true }) response: Response,
+    @Body() data: any
   ) {
-    const refresh_token = request.cookies['refresh_token'];
+    // const refresh_token = request.cookies['refresh_token'];
+    const { refresh_token } = data;
     return this.authService.processNewToken(refresh_token, response);
   }
 
@@ -57,5 +63,15 @@ export class AuthController {
     @UserReq() user: IUser,
   ) {
     return this.authService.logout(response, user);
+  }
+
+  @Public()
+  @ResponseMessage('Fetch user with social media')
+  @Post('/social-media')
+  handleLoginWithSocial(
+    @Body() registerUserWithSocialDto: RegisterUserWithSocialDto,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    return this.authService.loginWithSocial(registerUserWithSocialDto, response);
   }
 }

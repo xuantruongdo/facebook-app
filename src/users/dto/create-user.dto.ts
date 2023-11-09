@@ -2,8 +2,10 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
+  IsObject,
 } from 'class-validator';
 import mongoose from 'mongoose';
+import { IUserProvider } from 'src/type/users.interface';
 
 export class CreateUserDto {}
 
@@ -28,4 +30,18 @@ export class RegisterUserDto {
     message: 'Tên không được để trống',
   })
   name: string;
+}
+
+export class RegisterUserWithSocialDto {
+  @IsNotEmpty({
+    message: 'Type không được để trống',
+  })
+  type: string;
+
+
+  @IsNotEmpty({
+    message: 'User không được để trống',
+  })
+  user: IUserProvider;
+
 }

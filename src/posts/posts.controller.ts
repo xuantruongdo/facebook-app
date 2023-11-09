@@ -23,10 +23,18 @@ export class PostsController {
     return this.postsService.create(createPostDto, user);
   }
 
+  @Public()
   @ResponseMessage('Fetch all posts')
   @Get()
   findAll(@UserReq() user: IUser) {
-    return this.postsService.findAll(user);
+    return this.postsService.findAll();
+  }
+
+  @Public()
+  @ResponseMessage('Fetch posts with author')
+  @Get('/author/:userId')
+  findAllWithAuthor(@Param('userId') userId: string) {
+    return this.postsService.findAllWithAuthor(userId);
   }
 
   @Public()
@@ -51,7 +59,7 @@ export class PostsController {
     return this.postsService.remove(id, user);
   }
 
-  @ResponseMessage('Like a post')
+  @ResponseMessage('Like/Unlike a post')
   @Post('like/:id')
   handleLike(@Param('id') id: string, @UserReq() user: IUser) {
     return this.postsService.like(id, user);
