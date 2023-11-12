@@ -77,6 +77,7 @@ export class ChatsService {
       .find({
         users: { $elemMatch: { $eq: user._id } },
       })
+      .sort("-updatedAt")
       .populate([
         {
           path: 'latestMessage',

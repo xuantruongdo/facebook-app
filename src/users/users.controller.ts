@@ -9,9 +9,11 @@ import { IUser } from 'src/type/users.interface';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Public()
+  @ResponseMessage("Find all with id array")
+  @Post('find-all-with-id')
+  findAllWithId(@Body() data: any) {
+    return this.usersService.fillAllWithId(data);
   }
 
   @Public()

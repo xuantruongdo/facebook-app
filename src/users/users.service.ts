@@ -113,11 +113,12 @@ export class UsersService {
           throw new Error('Lỗi khi lưu thông tin người dùng');
         }
   }
-    
-  
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async fillAllWithId(data: any) {
+    const { ids } = data;
+    const onlineUsers = this.userModel.find({ _id: { $in: ids } }).select('-password -refreshToken')
+
+    return onlineUsers;
   }
 
   async findAll(qs: string) {

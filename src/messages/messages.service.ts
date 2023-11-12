@@ -44,10 +44,20 @@ export class MessagesService {
       latestMessage: newMessage._id,
     });
 
-    return {
-      _id: newMessage?._id,
-      createdAt: newMessage.createdAt,
-    };
+    return newMessage.populate([
+      { path: 'sender', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+      {
+        path: 'chat',
+        select: {
+          _id: 1,
+          chatName: 1,
+          isGroupChat: 1,
+          users: 1,
+          latestMessage: 1,
+          groupAdmin: 1,
+        },
+      },
+    ])
   }
 
   async findAll(_id: string) {
@@ -66,5 +76,4 @@ export class MessagesService {
       },
     ]);
   }
-
 }
