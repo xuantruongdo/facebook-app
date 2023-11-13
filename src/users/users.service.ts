@@ -66,65 +66,91 @@ export class UsersService {
     return await this.userModel
       .findById(id)
       .select('-password -refreshToken')
-      .populate('followings', '_id name email avatar followers')
-      .populate('followers', '_id name email avatar followings');
+      .populate([
+        {
+          path: 'followings',
+          select: {
+            _id: 1,
+            name: 1,
+            email: 1,
+            avatar: 1,
+            isActive: 1,
+            followers: 1,
+          },
+        },
+        {
+          path: 'followers',
+          select: {
+            _id: 1,
+            name: 1,
+            email: 1,
+            avatar: 1,
+            isActive: 1,
+            followings: 1,
+          },
+        },
+      ]);
   }
 
   async followUser(id: string, user: IUser) {
     try {
       const sentUser = await this.userModel.findById(user?._id);
       const receivedUser = await this.userModel.findById(id);
-  
-           // Check if `sentUser` and `receivedUser` exist
-           if (!sentUser || !receivedUser) {
-            throw new BadRequestException('Không tồn tại user');
-          }
-    
-          // Check if `receivedUser._id` is already in the `sentUser.followings` array
-          const followingIndex = sentUser.followings.indexOf(receivedUser._id);
-    
-          // Check if `sentUser._id` is already in the `receivedUser.followers` array
-          const followerIndex = receivedUser.followers.indexOf(sentUser._id);
-    
-          // If `receivedUser._id` is already in `sentUser.followings`, remove it
-          if (followingIndex !== -1) {
-            sentUser.followings.splice(followingIndex, 1);
-          } else {
-            // If it's not present, add `receivedUser._id` to the `sentUser.followings`
-            sentUser.followings.push(receivedUser._id);
-          }
-    
-          // If `sentUser._id` is already in `receivedUser.followers`, remove it
-          if (followerIndex !== -1) {
-            receivedUser.followers.splice(followerIndex, 1);
-          } else {
-            // If it's not present, add `sentUser._id` to the `receivedUser.followers`
-            receivedUser.followers.push(sentUser._id);
-          }
-    
-          // Update `receivedUser` in the database
-          await this.userModel.findByIdAndUpdate(id, receivedUser);
-    
-          // Update `sentUser` in the database
-          await this.userModel.findByIdAndUpdate(sentUser._id, sentUser);
-    
-          return 'ok';
-        } catch (error) {
-          throw new Error('Lỗi khi lưu thông tin người dùng');
-        }
+
+      // Check if `sentUser` and `receivedUser` exist
+      if (!sentUser || !receivedUser) {
+        throw new BadRequestException('Không tồn tại user');
+      }
+
+      // Check if `receivedUser._id` is already in the `sentUser.followings` array
+      const followingIndex = sentUser.followings.indexOf(receivedUser._id);
+
+      // Check if `sentUser._id` is already in the `receivedUser.followers` array
+      const followerIndex = receivedUser.followers.indexOf(sentUser._id);
+
+      // If `receivedUser._id` is already in `sentUser.followings`, remove it
+      if (followingIndex !== -1) {
+        sentUser.followings.splice(followingIndex, 1);
+      } else {
+        // If it's not present, add `receivedUser._id` to the `sentUser.followings`
+        sentUser.followings.push(receivedUser._id);
+      }
+
+      // If `sentUser._id` is already in `receivedUser.followers`, remove it
+      if (followerIndex !== -1) {
+        receivedUser.followers.splice(followerIndex, 1);
+      } else {
+        // If it's not present, add `sentUser._id` to the `receivedUser.followers`
+        receivedUser.followers.push(sentUser._id);
+      }
+
+      // Update `receivedUser` in the database
+      await this.userModel.findByIdAndUpdate(id, receivedUser);
+
+      // Update `sentUser` in the database
+      await this.userModel.findByIdAndUpdate(sentUser._id, sentUser);
+
+      return 'ok';
+    } catch (error) {
+      throw new Error('Lỗi khi lưu thông tin người dùng');
+    }
   }
 
   async fillAllWithId(data: any) {
     const { ids } = data;
-    const onlineUsers = this.userModel.find({ _id: { $in: ids } }).select('-password -refreshToken')
+    const onlineUsers = this.userModel
+      .find({ _id: { $in: ids } })
+      .select('-password -refreshToken');
 
     return onlineUsers;
   }
 
   async findAll(qs: string) {
     const { filter, sort, projection, population } = aqp(qs);
-    const users = await this.userModel.find(filter).select('-password -refreshToken')
-    return users
+    const users = await this.userModel
+      .find(filter)
+      .select('-password -refreshToken');
+    return users;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

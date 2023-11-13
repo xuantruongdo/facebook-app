@@ -71,7 +71,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token,
-      user: { _id, name, email, avatar, role },
+      user: { _id, name, email, avatar, role, isActive },
     };
   }
 

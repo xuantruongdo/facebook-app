@@ -35,14 +35,14 @@ export class ChatsController {
 
   @ResponseMessage("Add user to group chat")
   @Patch('/add/:id')
-  handleAddUserToGroup(@Param('id') id: string, @Body() addUserToGroupDto: AddUserToGroupDto) {
-    return this.chatsService.addUserToGroup(id, addUserToGroupDto);
+  handleAddUserToGroup(@Param('id') id: string, @Body() addUserToGroupDto: AddUserToGroupDto, @UserReq() user: IUser) {
+    return this.chatsService.addUserToGroup(id, addUserToGroupDto, user);
   }
 
   @ResponseMessage("Remove user from group chat")
   @Patch('/remove/:id')
-  handleRemoveFromGroup(@Param('id') id: string, @Body() addUserToGroupDto: AddUserToGroupDto) {
-    return this.chatsService.removeUserFromGroup(id, addUserToGroupDto);
+  handleRemoveFromGroup(@Param('id') id: string, @Body() addUserToGroupDto: AddUserToGroupDto, @UserReq() user: IUser) {
+    return this.chatsService.removeUserFromGroup(id, addUserToGroupDto, user);
   }
 
   @Delete(':id')

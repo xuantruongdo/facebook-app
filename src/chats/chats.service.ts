@@ -68,7 +68,7 @@ export class ChatsService {
           select: { content: 1, sender: 1 },
         },
         { path: 'users', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
-      ]);;
+      ]);
     }
   }
 
@@ -77,7 +77,7 @@ export class ChatsService {
       .find({
         users: { $elemMatch: { $eq: user._id } },
       })
-      .sort("-updatedAt")
+      .sort('-updatedAt')
       .populate([
         {
           path: 'latestMessage',
@@ -123,15 +123,23 @@ export class ChatsService {
       },
     });
 
-    return {
-      _id: newGroup?._id,
-      createdAt: newGroup.createdAt,
-    };
+    return newGroup.populate([
+      {
+        path: 'latestMessage',
+        populate: {
+          path: 'sender',
+          select: { _id: 1, name: 1, email: 1, avatar: 1 },
+        },
+        select: { content: 1, sender: 1 },
+      },
+      { path: 'users', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+      { path: 'isGroupChat', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+    ]);
   }
 
   async renameGroup(_id: string, updateChatDto: UpdateChatDto, user: IUser) {
     const { chatName } = updateChatDto;
-    return await this.chatModel.updateOne(
+    await this.chatModel.updateOne(
       { _id },
       {
         chatName: chatName,
@@ -141,15 +149,21 @@ export class ChatsService {
         },
       },
     );
+
+    return await this.chatModel.findById(_id);
   }
 
-  async addUserToGroup(_id: string, addUserToGroupDto: AddUserToGroupDto) {
+  async addUserToGroup(_id: string, addUserToGroupDto: AddUserToGroupDto, user: IUser) {
     const { users } = addUserToGroupDto;
 
     const chat = await this.chatModel.findById(_id);
 
     if (!chat) {
       throw new BadRequestException('Đoạn chat không tồn tại');
+    }
+
+    if (!chat.users.includes(user?._id as any)) {
+      throw new BadRequestException('Bạn không thuộc nhóm chat');
     }
 
     //@ts-ignore
@@ -167,10 +181,24 @@ export class ChatsService {
 
     await chat.save();
 
-    return 'ok';
+    return chat.populate([
+      {
+        path: 'latestMessage',
+        populate: {
+          path: 'sender',
+          select: { _id: 1, name: 1, email: 1, avatar: 1 },
+        },
+        select: { content: 1, sender: 1 },
+      },
+      { path: 'users', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+      {
+        path: 'groupAdmin',
+        select: { _id: 1, name: 1, email: 1, avatar: 1 },
+      },
+    ]);
   }
 
-  async removeUserFromGroup(_id: string, addUserToGroupDto: AddUserToGroupDto) {
+  async removeUserFromGroup(_id: string, addUserToGroupDto: AddUserToGroupDto, user: IUser) {
     const { users } = addUserToGroupDto;
 
     const chat = await this.chatModel.findById(_id);
@@ -178,6 +206,19 @@ export class ChatsService {
     if (!chat) {
       throw new BadRequestException('Đoạn chat không tồn tại');
     }
+
+    if (chat.groupAdmin.toString() !== user._id) {
+      throw new BadRequestException('Chỉ admin mới có quyền xóa');
+    }
+
+    if (users.includes(user?._id as any)) {
+      throw new BadRequestException('Không thể xóa admin');
+    }
+
+    if (chat.users.length - users.length < 3) {
+      throw new BadRequestException('Đoạn chat phải có tối thiểu 3 thành viên');
+    }
+
     const allUsersExistInChat = users.every((user) =>
       //@ts-ignore
       chat.users.includes(user),
@@ -196,7 +237,21 @@ export class ChatsService {
 
     await chat.save();
 
-    return 'ok';
+    return chat.populate([
+      {
+        path: 'latestMessage',
+        populate: {
+          path: 'sender',
+          select: { _id: 1, name: 1, email: 1, avatar: 1 },
+        },
+        select: { content: 1, sender: 1 },
+      },
+      { path: 'users', select: { _id: 1, name: 1, email: 1, avatar: 1 } },
+      {
+        path: 'groupAdmin',
+        select: { _id: 1, name: 1, email: 1, avatar: 1 },
+      },
+    ]);
   }
 
   remove(id: number) {

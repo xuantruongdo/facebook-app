@@ -42,10 +42,10 @@ export class User {
   @Prop()
   from: string;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [], ref: User.name })
   followers: mongoose.Types.ObjectId[];
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [], ref: User.name })
   followings: mongoose.Types.ObjectId[];
 
   @Prop()
