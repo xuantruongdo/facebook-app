@@ -47,7 +47,17 @@ export class AuthService {
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, avatar, role, isActive } = user;
+    const {
+      _id,
+      name,
+      email,
+      avatar,
+      role,
+      isActive,
+      type,
+      followers,
+      followings,
+    } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -56,7 +66,8 @@ export class AuthService {
       email,
       avatar,
       role,
-      isActive
+      type,
+      isActive,
     };
 
     const refresh_token = this.createRefreshToken(payload);
@@ -71,7 +82,17 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token,
-      user: { _id, name, email, avatar, role, isActive },
+      user: {
+        _id,
+        name,
+        email,
+        avatar,
+        role,
+        isActive,
+        type,
+        followers,
+        followings,
+      },
     };
   }
 
@@ -90,7 +111,17 @@ export class AuthService {
       let user = await this.usersService.findUserByToken(refresh_token_req);
 
       if (user) {
-        const { _id, name, email, avatar, role, isActive } = user;
+        const {
+          _id,
+          name,
+          email,
+          avatar,
+          role,
+          isActive,
+          type,
+          followers,
+          followings,
+        } = user;
 
         const payload = {
           sub: 'token login',
@@ -100,7 +131,8 @@ export class AuthService {
           email,
           avatar,
           role,
-          isActive
+          type,
+          isActive,
         };
 
         // const refresh_token = this.createRefreshToken(payload);
@@ -116,7 +148,17 @@ export class AuthService {
         return {
           access_token: this.jwtService.sign(payload),
           refresh_token: refresh_token_req,
-          user: { _id, name, email, avatar, role, isActive },
+          user: {
+            _id,
+            name,
+            email,
+            avatar,
+            role,
+            isActive,
+            type,
+            followers,
+            followings,
+          },
         };
       }
     } catch (err) {
@@ -141,7 +183,18 @@ export class AuthService {
     const isExist = await this.userModel.findOne({ email: user.email });
 
     if (isExist) {
-      const { _id, name, email, avatar, role, isActive, refreshToken } = isExist;
+      const {
+        _id,
+        name,
+        email,
+        avatar,
+        role,
+        isActive,
+        type,
+        followers,
+        followings,
+        refreshToken,
+      } = isExist;
 
       const payload = {
         sub: 'token login',
@@ -151,7 +204,8 @@ export class AuthService {
         email,
         avatar,
         role,
-        isActive
+        type,
+        isActive,
       };
       // const refresh_token = this.createRefreshToken(payload);
 
@@ -165,7 +219,17 @@ export class AuthService {
       return {
         access_token: this.jwtService.sign(payload),
         refresh_token: refreshToken,
-        user: { _id, name, email, avatar, role, isActive },
+        user: {
+          _id,
+          name,
+          email,
+          avatar,
+          role,
+          isActive,
+          type,
+          followers,
+          followings,
+        },
       };
     }
 
@@ -187,7 +251,8 @@ export class AuthService {
         email,
         avatar,
         role,
-        isActive
+        type,
+        isActive,
       };
 
       const refresh_token = this.createRefreshToken(payload);
@@ -202,7 +267,7 @@ export class AuthService {
       return {
         access_token: this.jwtService.sign(payload),
         refresh_token,
-        user: { _id, name, email, avatar, role, isActive },
+        user: { _id, name, email, avatar, role, isActive, type },
       };
     }
   }

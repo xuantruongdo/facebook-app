@@ -4,7 +4,7 @@ import {
   RegisterUserDto,
   RegisterUserWithSocialDto,
 } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto, UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -153,8 +153,46 @@ export class UsersService {
     return users;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(_id: string, updateUserDto: UpdateUserDto, user: IUser) {
+    const userExist = this.userModel.findById(_id);
+
+    if (!userExist) {
+      throw new BadRequestException('Không tồn tại user');
+    }
+
+    if (_id !== user?._id) {
+      throw new BadRequestException('Bạn không có quyền update');
+    }
+
+    await this.userModel.updateOne(
+      { _id },
+      {
+        ...updateUserDto,
+        updatedBy: {
+          _id: user?._id,
+          email: user?.email,
+        },
+      },
+    );
+
+    return await this.userModel.findById(_id).select('-password -refreshToken');
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, user: IUser) {
+    const { current_password, new_password } = changePasswordDto;
+    let userCurrent = await this.userModel.findOne({ _id: user?._id });
+    let isValid = this.isValidPassword(current_password, userCurrent.password);
+
+    if (isValid) {
+      const hashPassword = this.getHashPassword(new_password);
+      let updated = await this.userModel.updateOne({ _id: user?._id }, {
+        password: hashPassword
+      })
+      return updated;
+    } else {
+      throw new BadRequestException('Mật khẩu không chính xác.');
+    }
+
   }
 
   remove(id: number) {

@@ -51,14 +51,24 @@ export class ChatGateWay {
     }
   }
   
+  // @SubscribeMessage('message')
+  // handleMessage(@MessageBody() message: any): void {
+  //   this.server.emit(`message`, message);
+  // }
 
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() message: any): void {
-    this.server.emit('message', message);
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(client: any, room: string): void {
+    client.leaveAll();
+    client.join(room);
+  }
+
+  @SubscribeMessage('sendMessage')
+  handleMessage(client: any, payload: { room: string, message: string }): void {
+    this.server.to(payload.room).emit('newMessage', payload.message);
   }
 
   @SubscribeMessage('like')
-  handleLike(@MessageBody() data: any): void {
+  handleLike(@MessageBody() data: any): void { 
     const {sender, post, type, createdAt} = data;
   
     // Thêm thông báo
