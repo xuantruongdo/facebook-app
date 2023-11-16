@@ -153,7 +153,11 @@ export class ChatsService {
     return await this.chatModel.findById(_id);
   }
 
-  async addUserToGroup(_id: string, addUserToGroupDto: AddUserToGroupDto, user: IUser) {
+  async addUserToGroup(
+    _id: string,
+    addUserToGroupDto: AddUserToGroupDto,
+    user: IUser,
+  ) {
     const { users } = addUserToGroupDto;
 
     const chat = await this.chatModel.findById(_id);
@@ -198,7 +202,11 @@ export class ChatsService {
     ]);
   }
 
-  async removeUserFromGroup(_id: string, addUserToGroupDto: AddUserToGroupDto, user: IUser) {
+  async removeUserFromGroup(
+    _id: string,
+    addUserToGroupDto: AddUserToGroupDto,
+    user: IUser,
+  ) {
     const { users } = addUserToGroupDto;
 
     const chat = await this.chatModel.findById(_id);
@@ -254,7 +262,56 @@ export class ChatsService {
     ]);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+  async leaveGroup(_id: string, user: IUser) {
+    const chat = await this.chatModel.findById(_id);
+
+    if (!chat) {
+      throw new BadRequestException('Đoạn chat không tồn tại');
+    }
+
+    // Remove user._id from chat.users array
+    if (!chat?.isGroupChat) {
+      throw new BadRequestException('Bạn chỉ có thể rời khỏi nhóm chat');
+    }
+    //@ts-ignore
+    if (chat?.users.includes(user?._id)) {
+      chat.users = chat.users.filter(
+        (userId) => userId.toString() !== user._id.toString(),
+      );
+    } else {
+      throw new BadRequestException('Bạn không nằm trong đoạn chat');
+    }
+
+    // Save the updated chat document
+    await chat.save();
+
+    return 'ok';
+  }
+
+  async remove(_id: string, user: IUser) {
+    const chat = await this.chatModel.findById(_id);
+
+    if (!chat) {
+      throw new BadRequestException("Nhóm chat không tồn tại")
+    }
+
+    if (!chat?.isGroupChat) {
+      throw new BadRequestException('Bạn chỉ có thể xóa nhóm chat');
+    }
+
+    if (user?._id !== chat?.groupAdmin.toString()) {
+      throw new BadRequestException("Bạn không có quyền xóa nhóm chat này")
+    }
+    await this.chatModel.updateOne(
+      { _id },
+      {
+        deletedBy: {
+          _id: user?._id,
+          email: user?.email,
+        },
+      },
+    );
+
+    return this.chatModel.softDelete({ _id });
   }
 }

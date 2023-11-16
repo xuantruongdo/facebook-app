@@ -74,6 +74,17 @@ export class PostsService {
   }
 
   async update(_id: string, updatePostDto: UpdatePostDto, user: IUser) {
+
+    const post = await this.postModel.findById(_id);
+
+    if (!post) {
+      throw new BadRequestException("Bài viết không tồn tại")
+    }
+
+    if (post?.author.toString() !== user?._id) {
+      throw new BadRequestException("Bạn không có quyền sửa bài viết này")
+    }
+
     return await this.postModel.updateOne(
       { _id },
       {
@@ -87,6 +98,15 @@ export class PostsService {
   }
 
   async remove(_id: string, user: IUser) {
+    const post = await this.postModel.findById(_id);
+
+    if (!post) {
+      throw new BadRequestException("Bài viết không tồn tại")
+    }
+
+    if (post?.author.toString() !== user?._id) {
+      throw new BadRequestException("Bạn không có quyền xóa bài viết này")
+    }
     await this.postModel.updateOne(
       { _id },
       {

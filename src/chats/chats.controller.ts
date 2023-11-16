@@ -45,8 +45,14 @@ export class ChatsController {
     return this.chatsService.removeUserFromGroup(id, addUserToGroupDto, user);
   }
 
+  @ResponseMessage("Leave group chat")
+  @Patch('/leave/:id')
+  handleLeaveGroup(@Param('id') id: string, @UserReq() user: IUser) {
+    return this.chatsService.leaveGroup(id, user);
+  }
+
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatsService.remove(+id);
+  remove(@Param('id') id: string, @UserReq() user: IUser) {
+    return this.chatsService.remove(id, user);
   }
 }

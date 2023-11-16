@@ -1,11 +1,10 @@
 import {
-  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 
 @WebSocketGateway(8002, { cors: '*' })
 export class ChatGateWay {
@@ -58,7 +57,7 @@ export class ChatGateWay {
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: any, room: string): void {
-    client.leaveAll();
+     client.leaveAll();
     client.join(room);
   }
 
