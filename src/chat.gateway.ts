@@ -1,111 +1,116 @@
-// import {
-//   MessageBody,
-//   SubscribeMessage,
-//   WebSocketGateway,
-//   WebSocketServer,
-// } from '@nestjs/websockets';
-// import { Socket } from 'socket.io';
+import {
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 
-// @WebSocketGateway(8002, { cors: '*' })
-// export class ChatGateWay {
-//   @WebSocketServer()
-//   server;
+@WebSocketGateway(8002, { cors: '*' })
+export class ChatGateWay {
+  @WebSocketServer()
+  server;
 
-//   private onlineUsers: Set<string> = new Set();
+  private onlineUsers: Set<string> = new Set();
 
-//   handleConnection(client: Socket) {
-//     const userId = client.handshake.query.userId;
+  handleConnection(client: Socket) {
+    const userId = client.handshake.query.userId;
 
-//     if (userId) {
+    if (userId) {
 
-//       //@ts-ignore
-//       this.onlineUsers.add(userId);
-//       this.notifyOnlineUsers();
-//     }
-//   }
+      //@ts-ignore
+      this.onlineUsers.add(userId);
+      this.notifyOnlineUsers();
+    }
+  }
 
-//   handleDisconnect(client: Socket) {
+  handleDisconnect(client: Socket) {
 
-//     // Remove user from onlineUsers
-//     const userId = client.handshake.query.userId;
-//     if (userId) {
-//         //@ts-ignore
-//       this.onlineUsers.delete(userId);
-//       this.notifyOnlineUsers();
-//     }
-//   }
+    // Remove user from onlineUsers
+    const userId = client.handshake.query.userId;
+    if (userId) {
+        //@ts-ignore
+      this.onlineUsers.delete(userId);
+      this.notifyOnlineUsers();
+    }
+  }
 
-//   @SubscribeMessage('getOnlineUsers')
-//   handleGetOnlineUsers(client: Socket) {
-//     // Send the list of online users to the client upon request
-//     this.notifyOnlineUsers(client);
-//   }
+  @SubscribeMessage('getOnlineUsers')
+  handleGetOnlineUsers(client: Socket) {
+    // Send the list of online users to the client upon request
+    this.notifyOnlineUsers(client);
+  }
 
-//   private notifyOnlineUsers(client?: Socket, id?: string) {
-//     const usersArray = Array.from(this.onlineUsers);
-//     if (client && id) {
-//       client.emit('onlineUsers', usersArray);
-//     } else {
-//       this.server.emit('onlineUsers', usersArray);
-//     }
-//   }
-
-//   @SubscribeMessage('joinRoom')
-//   handleJoinRoom(client: any, room: string): void {
-//      client.leaveAll();
-//     client.join(room);
-//   }
-
-//   @SubscribeMessage('sendMessage')
-//   handleMessage(client: any, payload: { room: string, message: string }): void {
-//     this.server.to(payload.room).emit('newMessage', payload.message);
-//   }
-
-//   @SubscribeMessage('like')
-//   handleLike(@MessageBody() data: any): void { 
-//     const {sender, post, type, createdAt} = data;
+  private notifyOnlineUsers(client?: Socket, id?: string) {
+    const usersArray = Array.from(this.onlineUsers);
+    if (client && id) {
+      client.emit('onlineUsers', usersArray);
+    } else {
+      this.server.emit('onlineUsers', usersArray);
+    }
+  }
   
-//     // Thêm thông báo
-//     const notification = {
-//       sender: sender,
-//       message: `${sender?.name} liked your post!`,
-//       post: post,
-//       type: type,
-//       createdAt: createdAt
-//     };
+  // @SubscribeMessage('message')
+  // handleMessage(@MessageBody() message: any): void {
+  //   this.server.emit(`message`, message);
+  // }
 
-//     this.server.emit(`noti_${post?.author?._id}`, notification);
-//   }
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(client: any, room: string): void {
+     client.leaveAll();
+    client.join(room);
+  }
 
-//   @SubscribeMessage('comment')
-//   handleComment(@MessageBody() data: any): void {
-//     const {sender, post, type, createdAt} = data;
+  @SubscribeMessage('sendMessage')
+  handleMessage(client: any, payload: { room: string, message: string }): void {
+    this.server.to(payload.room).emit('newMessage', payload.message);
+  }
+
+  @SubscribeMessage('like')
+  handleLike(@MessageBody() data: any): void { 
+    const {sender, post, type, createdAt} = data;
   
-//     // Thêm thông báo
-//     const notification = {
-//       sender: sender,
-//       message: `${sender?.name} commented your post!`,
-//       post: post,
-//       type: type,
-//       createdAt: createdAt
-//     };
+    // Thêm thông báo
+    const notification = {
+      sender: sender,
+      message: `${sender?.name} liked your post!`,
+      post: post,
+      type: type,
+      createdAt: createdAt
+    };
 
-//     this.server.emit(`noti_${post?.author?._id}`, notification);
-//   }
+    this.server.emit(`noti_${post?.author?._id}`, notification);
+  }
 
-//   @SubscribeMessage('follow')
-//   handleFollow(@MessageBody() data: any): void {
-//     const {sender, post, type, createdAt} = data;
+  @SubscribeMessage('comment')
+  handleComment(@MessageBody() data: any): void {
+    const {sender, post, type, createdAt} = data;
   
-//     // Thêm thông báo
-//     const notification = {
-//       sender: sender,
-//       message: `${sender?.name} followed you!`,
-//       post: post,
-//       type: type,
-//       createdAt: createdAt
-//     };
+    // Thêm thông báo
+    const notification = {
+      sender: sender,
+      message: `${sender?.name} commented your post!`,
+      post: post,
+      type: type,
+      createdAt: createdAt
+    };
 
-//     this.server.emit(`noti_${post?.author?._id}`, notification);
-//   }
-// }
+    this.server.emit(`noti_${post?.author?._id}`, notification);
+  }
+
+  @SubscribeMessage('follow')
+  handleFollow(@MessageBody() data: any): void {
+    const {sender, post, type, createdAt} = data;
+  
+    // Thêm thông báo
+    const notification = {
+      sender: sender,
+      message: `${sender?.name} followed you!`,
+      post: post,
+      type: type,
+      createdAt: createdAt
+    };
+
+    this.server.emit(`noti_${post?.author?._id}`, notification);
+  }
+}
