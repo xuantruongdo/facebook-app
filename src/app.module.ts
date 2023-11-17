@@ -10,7 +10,6 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
-import { ChatGateWay } from './chat.gateway';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -34,6 +33,6 @@ import { ChatGateWay } from './chat.gateway';
     ChatsModule,
     MessagesModule,],
   controllers: [AppController],
-  providers: [AppService, ChatGateWay],
+  providers: [AppService],
 })
 export class AppModule {}
