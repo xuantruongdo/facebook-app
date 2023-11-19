@@ -12,6 +12,7 @@ import { IUser } from 'src/type/users.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from 'src/users/entities/user.entity';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
