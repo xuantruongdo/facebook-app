@@ -11,6 +11,7 @@ import { CommentsModule } from './comments/comments.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
 import { ChatGateWay } from './chat.gateway';
+import { DatabasesModule } from './databases/databases.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -32,7 +33,8 @@ import { ChatGateWay } from './chat.gateway';
     PostsModule,
     CommentsModule,
     ChatsModule,
-    MessagesModule,],
+    MessagesModule,
+    DatabasesModule,],
   controllers: [AppController],
   providers: [AppService, ChatGateWay],
 })
