@@ -12,11 +12,14 @@ import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
 import { ChatGateWay } from './chat.gateway';
 import { DatabasesModule } from './databases/databases.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true
-  }),
+  imports: [
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -24,7 +27,7 @@ import { DatabasesModule } from './databases/databases.module';
         connectionFactory: (connection) => {
           connection.plugin(softDeletePlugin);
           return connection;
-        }
+        },
       }),
       inject: [ConfigService],
     }),
@@ -34,7 +37,8 @@ import { DatabasesModule } from './databases/databases.module';
     CommentsModule,
     ChatsModule,
     MessagesModule,
-    DatabasesModule,],
+    DatabasesModule,
+  ],
   controllers: [AppController],
   providers: [AppService, ChatGateWay],
 })

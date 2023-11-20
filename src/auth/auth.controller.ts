@@ -7,6 +7,7 @@ import {
   Get,
   Res,
   Req,
+  Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -17,11 +18,12 @@ import { Public, ResponseMessage, UserReq } from 'src/decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request as RequestType, Response } from 'express';
 import { IUser } from 'src/type/users.interface';
+import { Cron } from '@nestjs/schedule';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  private readonly logger = new Logger(AuthService.name);
   @Public()
   @ResponseMessage('Register a user')
   @Post('/register')
@@ -73,5 +75,14 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response
   ) {
     return this.authService.loginWithSocial(registerUserWithSocialDto, response);
+  }
+
+  @Public()
+  @ResponseMessage('Fix sleep backend')
+  @Get()
+  @Cron('0 */5 * * * *')
+  handleFixSleep() {
+    this.logger.log('Calling API every 5 minutes');
+    return 'fix ok'
   }
 }
