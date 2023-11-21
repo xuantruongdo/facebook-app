@@ -80,9 +80,9 @@ export class AuthController {
   @Public()
   @ResponseMessage('Fix sleep backend')
   @Get()
-  @Cron('0 */5 * * * *')
+  @Cron('*/1 * * * *')
   handleFixSleep() {
-    this.logger.log('Calling API every 5 minutes');
+    this.logger.log('Calling API every 1 minutes');
     return 'fix ok'
   }
 }
